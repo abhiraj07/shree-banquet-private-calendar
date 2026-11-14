@@ -10,7 +10,6 @@
   /* ---------- public booking calendar ---------- */
   .public-calendar{padding:100px 0;background:var(--cream);}
   .public-calendar-card{background:var(--emerald-950);color:var(--cream);border-radius:22px;padding:clamp(20px,4vw,42px);box-shadow:var(--shadow-soft);}
-  .public-calendar-brand{text-align:center;color:var(--gold-300);font-size:14px;letter-spacing:.12em;font-weight:600;text-transform:uppercase;margin-bottom:14px;}
   .public-calendar-title{text-align:center;color:var(--cream);font:500 clamp(30px,4vw,42px) 'Cormorant Garamond',serif;margin:0 0 8px;}
   .public-calendar-sub{text-align:center;color:var(--gold-300);font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 26px;}
   .public-calendar-rule{height:1px;background:var(--gold-500);margin:0 0 24px;}
@@ -33,15 +32,15 @@
   @media(max-width:560px){.public-calendar{padding:72px 0}.public-calendar-card{border-radius:16px;padding:18px 12px}.public-calendar-grid{gap:4px}.public-calendar-day{min-height:44px;border-radius:8px}.public-calendar-legend{gap:12px;font-size:12px}}
 
 
-.site-top{background:linear-gradient(120deg,var(--emerald-950),var(--emerald-800));color:white;padding:14px 5vw;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:94px}
-.site-brand-link{display:flex;align-items:center;gap:22px;color:inherit;text-decoration:none}
+.site-top{background:linear-gradient(120deg,var(--emerald-950),var(--emerald-800));color:white;padding:20px 5vw;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.site-brand-link{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}
 .site-brand-logo{display:block;width:42px;height:42px;color:var(--gold-300);flex:none}
 .site-brand-logo svg{width:100%;height:100%;display:block}
-.site-brand{font:600 30px "Cormorant Garamond",serif;color:var(--gold-300);line-height:1}
-.site-brand small{display:block;font:500 14px Jost,sans-serif;letter-spacing:.2em;color:#fffa;margin-top:8px}
+.site-brand{font:600 22px "Cormorant Garamond",serif;color:var(--gold-300)}
+.site-brand small{display:block;font:11px Jost,sans-serif;letter-spacing:.2em;color:#fffa;margin-top:3px}
 .admin-login-link{flex:none;background:linear-gradient(135deg,var(--gold-300),var(--gold-500));color:var(--emerald-950);text-decoration:none;font:600 12px Jost,sans-serif;letter-spacing:.08em;padding:11px 18px;border-radius:999px;box-shadow:0 5px 18px #042a2122}
 .admin-login-link:hover{filter:brightness(1.04)}
-@media(max-width:560px){.site-top{padding:14px 16px;min-height:78px}.site-brand-link{gap:10px}.site-brand-logo{width:34px;height:34px}.site-brand{font-size:21px}.site-brand small{font-size:9px;letter-spacing:.15em;margin-top:5px}.admin-login-link{padding:9px 12px;font-size:11px}}\n</style></head><body>
+@media(max-width:600px){.site-top{padding:16px 18px}.site-brand{font-size:19px}.admin-login-link{padding:9px 12px;font-size:11px}}\n</style></head><body>
 <header class="site-top"><a class="site-brand-link" href="./index.html" aria-label="Shree Banquet Hall home"><span class="site-brand-logo" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor">
 <defs><path id="petalHome" d="M50,15 C54,23 54,31 50,40 C46,31 46,23 50,15 Z"/></defs>
 <g stroke-width="0.9"><use href="#petalHome" transform="rotate(0 50 50)"/><use href="#petalHome" transform="rotate(22.5 50 50)"/><use href="#petalHome" transform="rotate(45 50 50)"/><use href="#petalHome" transform="rotate(67.5 50 50)"/><use href="#petalHome" transform="rotate(90 50 50)"/><use href="#petalHome" transform="rotate(112.5 50 50)"/><use href="#petalHome" transform="rotate(135 50 50)"/><use href="#petalHome" transform="rotate(157.5 50 50)"/><use href="#petalHome" transform="rotate(180 50 50)"/><use href="#petalHome" transform="rotate(202.5 50 50)"/><use href="#petalHome" transform="rotate(225 50 50)"/><use href="#petalHome" transform="rotate(247.5 50 50)"/><use href="#petalHome" transform="rotate(270 50 50)"/><use href="#petalHome" transform="rotate(292.5 50 50)"/><use href="#petalHome" transform="rotate(315 50 50)"/><use href="#petalHome" transform="rotate(337.5 50 50)"/></g>
@@ -54,7 +53,6 @@
       <p>Explore the calendar to see available, pending and booked dates at Shree Banquet Hall.</p>
     </div>
     <div class="public-calendar-card reveal">
-      <div class="public-calendar-brand">KR · Shree Banquet Hall</div>
       <h3 class="public-calendar-title">Booking Calendar</h3>
       <p class="public-calendar-sub">Your Celebration, Our Privilege</p>
       <div class="public-calendar-rule"></div>
