@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Admin Calendar | Shree Banquet Hall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--g:#042A21;--g2:#063B2F;--gold:#C89B3C;--gl:#E8CD8A;--cream:#FAF6EC;--ink:#1C241F;--muted:#69736d;--line:rgba(200,155,60,.32)}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Jost,sans-serif}
+.top{background:linear-gradient(120deg,var(--g),var(--g2));color:white;padding:20px 5vw;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand-link{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}.brand-link:focus-visible{outline:2px solid var(--gl);outline-offset:5px;border-radius:4px}.brand-logo{display:block;width:42px;height:42px;color:var(--gl);flex:none}.brand-logo svg{width:100%;height:100%;display:block}.brand{font:600 22px "Cormorant Garamond",serif;color:var(--gl)}.brand small{display:block;font:11px Jost,sans-serif;letter-spacing:.2em;color:#fffa;margin-top:3px}
+button,input{font:inherit}.btn{border:0;border-radius:10px;padding:11px 16px;cursor:pointer;font-weight:600}.gold{background:linear-gradient(135deg,var(--gl),var(--gold));color:var(--g)}.outline{background:transparent;border:1px solid var(--line);color:var(--g)}button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px -35px #042a2170;padding:26px}
+.login{max-width:440px;margin:8vh auto}h1{font:600 36px "Cormorant Garamond",serif;color:var(--g);margin:0 0 8px}p{color:var(--muted);margin:0 0 22px}
+.field{display:block;margin:16px 0}.field span{display:block;font-size:13px;font-weight:600;margin-bottom:7px}.field input{width:100%;padding:13px;border:1px solid #d9ded9;border-radius:10px}
+.hidden{display:none!important}.error{color:#a52e2e;min-height:22px;margin-top:12px;font-size:14px}
+.head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}.month{font:600 28px "Cormorant Garamond",serif;color:var(--g)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 22px}.legend span{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}.dot{width:11px;height:11px;border-radius:50%}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.dow{text-align:center;font-size:12px;font-weight:600;color:var(--muted);padding:8px 0}
+.day{min-height:82px;border:1px solid #e6e8e3;border-radius:12px;background:#fff;padding:9px;text-align:left;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between}
+.day .state{font-size:11px}.available{background:#e5f2e8;border-color:#c7e2cd;color:#236b38}.pending{background:#f8e8c8;border-color:#eed39a;color:#91600c}.booked{background:#f8dede;border-color:#efc1c1;color:#a52e2e}.past{background:#e7e7e7;border-color:#ddd;color:#777;cursor:not-allowed}.selected{outline:2px solid var(--g);outline-offset:2px}
+.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid #eee}.selected-label{font-weight:600;margin-right:auto}.note{font-size:13px;color:var(--muted);width:100%;margin-top:3px}
+@media(max-width:600px){main{margin:20px auto;padding:0 12px}.panel{padding:16px}.top{padding:16px 18px}.brand{font-size:19px}.day{min-height:62px;padding:6px;border-radius:8px}.day .state{font-size:9px}.grid{gap:5px}.month{font-size:24px}.btn{padding:10px 11px;font-size:13px}}
+</style></head>
+<body>
+<header class="top"><a class="brand-link" href="./index.html" aria-label="Shree Banquet Hall home"><span class="brand-logo" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor">
+          <defs><path id="petalAdmin" d="M50,15 C54,23 54,31 50,40 C46,31 46,23 50,15 Z"/></defs>
+          <g class="petals" stroke-width="0.9">
+            <use href="#petalAdmin" transform="rotate(0 50 50)"/><use href="#petalAdmin" transform="rotate(22.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(45 50 50)"/><use href="#petalAdmin" transform="rotate(67.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(90 50 50)"/><use href="#petalAdmin" transform="rotate(112.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(135 50 50)"/><use href="#petalAdmin" transform="rotate(157.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(180 50 50)"/><use href="#petalAdmin" transform="rotate(202.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(225 50 50)"/><use href="#petalAdmin" transform="rotate(247.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(270 50 50)"/><use href="#petalAdmin" transform="rotate(292.5 50 50)"/>
+            <use href="#petalAdmin" transform="rotate(315 50 50)"/><use href="#petalAdmin" transform="rotate(337.5 50 50)"/>
+          </g>
+          <circle cx="50" cy="50" r="33" stroke-width="1"/>
+          <circle cx="50" cy="50" r="27" stroke-width="0.6"/>
+          <text x="50" y="59" text-anchor="middle" font-family="Cinzel, serif" font-size="24" font-weight="600" fill="currentColor" stroke="none">KR</text>
+        </svg></span><span class="brand">Shree Banquet Hall<small>PRIVATE BOOKING MANAGEMENT</small></span></a><button id="logout" class="btn outline hidden" style="color:white;border-color:#ffffff66">Log out</button></header>
+<main>
+<section id="loginPanel" class="panel login"><h1>Admin Login</h1><p>Sign in to manage the private booking calendar.</p>
+<form id="loginForm"><label class="field"><span>Username or email</span><input id="username" autocomplete="username" placeholder="admin980123 or krshreebanquethall@gmail.com" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label><button class="btn gold" type="submit" style="width:100%">Login securely</button><div id="loginError" class="error" role="alert"></div></form></section>
+<section id="calendarPanel" class="panel hidden"><div class="head"><div><h1>Booking Calendar</h1><p style="margin:0">Internal use only · Select a date to update its status.</p></div><div><button id="prev" class="btn outline" type="button">‹</button> <button id="next" class="btn outline" type="button">›</button></div></div>
+<div id="monthTitle" class="month"></div><div class="legend"><span><i class="dot" style="background:#55a66a"></i>Available</span><span><i class="dot" style="background:#d9a53d"></i>Pending</span><span><i class="dot" style="background:#d85b5b"></i>Booked</span><span><i class="dot" style="background:#aaa"></i>Past</span></div>
+<div id="calendar" class="grid"></div><div class="actions"><div id="selectedLabel" class="selected-label">Select a future date</div><button id="setPending" class="btn" style="background:#f8e8c8;color:#805300" disabled>Set Pending</button><button id="setBooked" class="btn" style="background:#f8dede;color:#922" disabled>Mark Booked</button><button id="setAvailable" class="btn outline" disabled>Set Available</button><div id="message" class="note" role="status">Changes save automatically to the secure database.</div></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://agshupnzhpeqiwezsnyp.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M';
+const ADMIN_EMAIL='krshreebanquethall@gmail.com', ADMIN_USERNAME='admin980123';
+const ADMIN_USER_ID='5643d2c0-ffc0-4318-b796-6c7eb2d2bc60';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY), $=id=>document.getElementById(id);
+let month=new Date(new Date().getFullYear(),new Date().getMonth(),1), records=new Map(), selected=null;
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today=()=>iso(new Date());
+function msg(t,error=false){$('message').textContent=t;$('message').style.color=error?'#a52e2e':''}
+function showCalendar(){$('loginPanel').classList.add('hidden');$('calendarPanel').classList.remove('hidden');$('logout').classList.remove('hidden');loadMonth()}
+async function checkSession(){const {data:{session}}=await db.auth.getSession();if(!session)return;if(session.user?.id===ADMIN_USER_ID){showCalendar();return}await db.auth.signOut()}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginError').textContent='';const enteredUsername=$('username').value.trim().toLowerCase();if(enteredUsername!==ADMIN_USERNAME && enteredUsername!==ADMIN_EMAIL){$('loginError').textContent='Enter admin980123 or the registered admin email.';return}
+const {error}=await db.auth.signInWithPassword({email:ADMIN_EMAIL,password:$('password').value});if(error){$('loginError').textContent='Login failed. Check your username and password.';return}const {data:{user}}=await db.auth.getUser();if(user?.id!==ADMIN_USER_ID){await db.auth.signOut();$('loginError').textContent='This account is not authorised for admin access.';return}showCalendar()});
+$('logout').addEventListener('click',async()=>{await db.auth.signOut();$('calendarPanel').classList.add('hidden');$('loginPanel').classList.remove('hidden');$('logout').classList.add('hidden');$('password').value=''});
+async function loadMonth(){msg('Loading saved dates…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
+const {data,error}=await db.from('booking_dates').select('booking_date,status').gte('booking_date',start).lte('booking_date',end);
+if(error){msg('Could not load dates. Please refresh or sign in again.',true);return}records=new Map(data.map(x=>[x.booking_date,x.status]));render();msg('Changes save automatically to the secure database.')}
+function render(){$('monthTitle').textContent=month.toLocaleDateString('en-IN',{month:'long',year:'numeric'});const g=$('calendar');g.innerHTML='';
+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>{const d=document.createElement('div');d.className='dow';d.textContent=x;g.append(d)});
+const first=new Date(month.getFullYear(),month.getMonth(),1),offset=first.getDay(),count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();for(let i=0;i<offset;i++)g.append(document.createElement('div'));
+for(let n=1;n<=count;n++){const date=new Date(month.getFullYear(),month.getMonth(),n),key=iso(date),status=records.get(key),past=key<today(),b=document.createElement('button');b.type='button';b.className='day '+(past?'past':status||'available')+(selected===key?' selected':'');b.disabled=past;
+const num=document.createElement('span');num.textContent=n;const st=document.createElement('span');st.className='state';st.textContent=past?'Past':status?status[0].toUpperCase()+status.slice(1):'Available';b.append(num,st);b.addEventListener('click',()=>choose(key));g.append(b)}}
+function choose(key){selected=key;const status=records.get(key);$('selectedLabel').textContent=`${new Date(key+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})} · ${status?status[0].toUpperCase()+status.slice(1):'Available'}`;$('setPending').disabled=false;$('setBooked').disabled=false;$('setAvailable').disabled=!status;render()}
+async function save(status){if(!selected)return;msg('Saving…');let result=status==='available'?await db.from('booking_dates').delete().eq('booking_date',selected):await db.from('booking_dates').upsert({booking_date:selected,status,updated_at:new Date().toISOString()},{onConflict:'booking_date'});
+if(result.error){msg('Could not save this change. Please try again.',true);return}await loadMonth();choose(selected);msg('Saved successfully.')}
+$('setPending').addEventListener('click',()=>save('pending'));$('setBooked').addEventListener('click',()=>save('booked'));$('setAvailable').addEventListener('click',()=>save('available'));
+$('prev').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=null;loadMonth()});$('next').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=null;loadMonth()});checkSession();
+</script></body></html>
