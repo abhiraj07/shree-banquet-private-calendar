@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Booking Calendar | Shree Banquet Hall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--emerald-950:#042A21;--emerald-800:#063B2F;--emerald-700:#0E4F3E;--gold-600:#A9812F;--gold-500:#C89B3C;--gold-300:#E8CD8A;--cream:#FAF6EC;--ink:#1C241F;--ink-soft:#5B6660;--shadow-soft:0 20px 60px -20px rgba(4,42,33,.25)}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}h2,h3{font-family:'Cormorant Garamond',serif;font-weight:500;color:var(--emerald-800)}.wrap{max-width:1180px;margin:0 auto;padding:0 32px}.head{text-align:center;max-width:640px;margin:0 auto 56px}.head .eyebrow{display:block;margin-bottom:14px;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold-600);font-weight:500}.head h2{font-size:clamp(28px,4vw,42px);margin:0 0 16px}.head p{color:var(--ink-soft);font-size:15.5px;line-height:1.75;font-weight:300}
+  /* ---------- public booking calendar ---------- */
+  .public-calendar{padding:100px 0;background:var(--cream);}
+  .public-calendar-card{background:var(--emerald-950);color:var(--cream);border-radius:22px;padding:clamp(20px,4vw,42px);box-shadow:var(--shadow-soft);}
+  .public-calendar-brand{text-align:center;color:var(--gold-300);font-size:14px;letter-spacing:.12em;font-weight:600;text-transform:uppercase;margin-bottom:14px;}
+  .public-calendar-title{text-align:center;color:var(--cream);font:500 clamp(30px,4vw,42px) 'Cormorant Garamond',serif;margin:0 0 8px;}
+  .public-calendar-sub{text-align:center;color:var(--gold-300);font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 26px;}
+  .public-calendar-rule{height:1px;background:var(--gold-500);margin:0 0 24px;}
+  .public-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  .public-calendar-month{font:600 clamp(23px,3vw,30px) 'Cormorant Garamond',serif;color:var(--cream);}
+  .public-calendar-nav{display:flex;gap:8px;}
+  .public-calendar-nav button{border:0;background:transparent;color:var(--gold-300);font-size:30px;line-height:1;padding:2px 8px;cursor:pointer;}
+  .public-calendar-nav button:focus-visible{outline:2px solid var(--gold-300);border-radius:6px;}
+  .public-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;}
+  .public-calendar-dow{text-align:center;color:var(--gold-300);font-weight:600;padding:7px 0;font-size:13px;}
+  .public-calendar-day{min-height:clamp(48px,6vw,68px);border-radius:12px;background:#0b5141;color:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,2vw,19px);}
+  .public-calendar-day.booked{background:#a14343;}
+  .public-calendar-day.pending{background:#a17a32;}
+  .public-calendar-day.past{background:#45534e;color:#c2c9c5;}
+  .public-calendar-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;color:var(--cream);font-size:14px;}
+  .public-calendar-legend span{display:flex;align-items:center;gap:7px;}
+  .public-calendar-dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+  .public-calendar-note{text-align:center;color:var(--ink-soft);font-size:13px;margin:14px 0 0;}
+  .public-calendar-status{text-align:center;color:var(--gold-300);font-size:12px;margin:12px 0 0;min-height:18px;}
+  @media(max-width:560px){.public-calendar{padding:72px 0}.public-calendar-card{border-radius:16px;padding:18px 12px}.public-calendar-grid{gap:4px}.public-calendar-day{min-height:44px;border-radius:8px}.public-calendar-legend{gap:12px;font-size:12px}}
+
+
+</style></head><body>
+<section class="public-calendar" id="availability">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow">Plan Your Celebration</span>
+      <h2>Check Date Availability</h2>
+      <p>Explore the calendar to see available, pending and booked dates at Shree Banquet Hall.</p>
+    </div>
+    <div class="public-calendar-card reveal">
+      <div class="public-calendar-brand">KR · Shree Banquet Hall</div>
+      <h3 class="public-calendar-title">Booking Calendar</h3>
+      <p class="public-calendar-sub">Your Celebration, Our Privilege</p>
+      <div class="public-calendar-rule"></div>
+      <div class="public-calendar-head">
+        <div id="publicMonthTitle" class="public-calendar-month">Loading calendar…</div>
+        <div class="public-calendar-nav">
+          <button id="publicPrev" type="button" aria-label="Previous month">‹</button>
+          <button id="publicNext" type="button" aria-label="Next month">›</button>
+        </div>
+      </div>
+      <div id="publicCalendarGrid" class="public-calendar-grid" aria-live="polite"></div>
+      <div class="public-calendar-legend">
+        <span><i class="public-calendar-dot" style="background:#a14343"></i>Booked</span>
+        <span><i class="public-calendar-dot" style="background:#0b5141"></i>Available</span>
+        <span><i class="public-calendar-dot" style="background:#a17a32"></i>Pending</span>
+      </div>
+      <div id="publicCalendarStatus" class="public-calendar-status" role="status"></div>
+    </div>
+    <p class="public-calendar-note">For confirmation or booking enquiries, please contact us directly.</p>
+  </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ---------- public read-only booking calendar ----------
+const PUBLIC_SUPABASE_URL='https://agshupnzhpeqiwezsnyp.supabase.co';
+const PUBLIC_SUPABASE_KEY='sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M';
+const publicDb=window.supabase.createClient(PUBLIC_SUPABASE_URL,PUBLIC_SUPABASE_KEY);
+let publicMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+const publicIso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+async function loadPublicCalendar(){
+  const title=document.getElementById('publicMonthTitle'),grid=document.getElementById('publicCalendarGrid'),status=document.getElementById('publicCalendarStatus');
+  title.textContent=publicMonth.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  grid.innerHTML='';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(day=>{const el=document.createElement('div');el.className='public-calendar-dow';el.textContent=day;grid.append(el)});
+  const start=publicIso(new Date(publicMonth.getFullYear(),publicMonth.getMonth(),1));
+  const end=publicIso(new Date(publicMonth.getFullYear(),publicMonth.getMonth()+1,0));
+  status.textContent='Updating availability…';
+  const {data,error}=await publicDb.from('booking_dates').select('booking_date,status').gte('booking_date',start).lte('booking_date',end);
+  if(error){status.textContent='Calendar is temporarily unavailable. Please contact us to confirm a date.';return}
+  const records=new Map((data||[]).map(row=>[row.booking_date,row.status]));
+  const first=new Date(publicMonth.getFullYear(),publicMonth.getMonth(),1),offset=first.getDay(),count=new Date(publicMonth.getFullYear(),publicMonth.getMonth()+1,0).getDate();
+  for(let i=0;i<offset;i++)grid.append(document.createElement('div'));
+  const today=publicIso(new Date());
+  for(let day=1;day<=count;day++){
+    const date=publicIso(new Date(publicMonth.getFullYear(),publicMonth.getMonth(),day)),state=records.get(date),cell=document.createElement('div');
+    cell.className='public-calendar-day'+(state?' '+state:(date<today?' past':''));
+    cell.textContent=day;
+    cell.setAttribute('aria-label',`${day} ${publicMonth.toLocaleDateString('en-IN',{month:'long'})}: ${state|| (date<today?'Past':'Available')}`);
+    grid.append(cell);
+  }
+  status.textContent='';
+}
+document.getElementById('publicPrev').addEventListener('click',()=>{publicMonth=new Date(publicMonth.getFullYear(),publicMonth.getMonth()-1,1);loadPublicCalendar()});
+document.getElementById('publicNext').addEventListener('click',()=>{publicMonth=new Date(publicMonth.getFullYear(),publicMonth.getMonth()+1,1);loadPublicCalendar()});
+loadPublicCalendar();
+
+
+</script></body></html>
