@@ -74,7 +74,7 @@ const {error}=await db.auth.signInWithPassword({email:ADMIN_EMAIL,password:$('pa
 $('logout').addEventListener('click',async()=>{if(realtimeChannel)await db.removeChannel(realtimeChannel);realtimeChannel=null;await db.auth.signOut();$('calendarPanel').classList.add('hidden');$('loginPanel').classList.remove('hidden');$('logout').classList.add('hidden');$('password').value=''});
 async function loadMonth(){msg('Loading saved dates…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
 const [publicResult,privateResult]=await Promise.all([
- db.from('booking_dates').select('booking_date,status').gte('booking_date',start).lte('booking_date',end),
+ db.from('public_booking_calendar').select('booking_date,status').gte('booking_date',start).lte('booking_date',end),
  db.from('admin_bookings').select('booking_date,status,client_name,client_phone,event_type,notes').gte('booking_date',start).lte('booking_date',end)
 ]);
 if(publicResult.error){msg('Could not load calendar dates. Check database setup and admin access.',true);return}
