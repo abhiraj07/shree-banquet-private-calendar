@@ -42,38 +42,119 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
         </svg></span><span class="brand">Shree Banquet Hall<small>PRIVATE BOOKING MANAGEMENT</small></span></a><button id="logout" class="btn outline hidden" style="color:white;border-color:#ffffff66">Log out</button></header>
 <main>
 <section id="loginPanel" class="panel login"><h1>Admin Login</h1><p>Sign in to manage the private booking calendar.</p>
-<form id="loginForm"><label class="field"><span>Username or email</span><input id="username" autocomplete="username" placeholder="admin980123 or krshreebanquethall@gmail.com" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label><button class="btn gold" type="submit" style="width:100%">Login securely</button><div id="loginError" class="error" role="alert"></div></form></section>
+<form id="loginForm"><label class="field"><span>Admin username</span><input id="username" autocomplete="username" placeholder="Enter admin username" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label><button class="btn gold" type="submit" style="width:100%">Login securely</button><div id="loginError" class="error" role="alert"></div></form></section>
 <section id="calendarPanel" class="panel hidden"><div class="head"><div><h1>Booking Calendar</h1><p style="margin:0">Internal use only · Select a date to update its status.</p></div><div><button id="prev" class="btn outline" type="button">‹</button> <button id="next" class="btn outline" type="button">›</button></div></div>
 <div id="monthTitle" class="month"></div><div class="legend"><span><i class="dot" style="background:#55a66a"></i>Available</span><span><i class="dot" style="background:#d9a53d"></i>Pending</span><span><i class="dot" style="background:#d85b5b"></i>Booked</span><span><i class="dot" style="background:#aaa"></i>Past</span></div>
-<div id="calendar" class="grid"></div><div class="actions"><div id="selectedLabel" class="selected-label">Select a future date</div><button id="setPending" class="btn" style="background:#f8e8c8;color:#805300" disabled>Set Pending</button><button id="setBooked" class="btn" style="background:#f8dede;color:#922" disabled>Mark Booked</button><button id="setAvailable" class="btn outline" disabled>Set Available</button><div id="message" class="note" role="status">Changes save automatically to the secure database.</div></div></section>
+<div id="calendar" class="grid"></div><div class="actions"><div id="selectedLabel" class="selected-label">Select a future date</div><button id="setPending" class="btn" style="background:#f8e8c8;color:#805300" disabled>Set Pending</button><button id="setBooked" class="btn" style="background:#f8dede;color:#922" disabled>Mark Booked</button><button id="setAvailable" class="btn outline" disabled>Set Available</button><button id="migrateLegacy" class="btn outline" type="button">Import old website dates</button><div id="message" class="note" role="status">Changes save automatically to the secure database.</div></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL='https://agshupnzhpeqiwezsnyp.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M';
-const ADMIN_EMAIL='krshreebanquethall@gmail.com', ADMIN_USERNAME='admin980123';
-const ADMIN_USER_ID='5643d2c0-ffc0-4318-b796-6c7eb2d2bc60';
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY), $=id=>document.getElementById(id);
-let month=new Date(new Date().getFullYear(),new Date().getMonth(),1), records=new Map(), selected=null;
-const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const today=()=>iso(new Date());
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDoo51V8Y5HqSTPBWnlNqn-zkg8nLfAmSU",
+  authDomain: "gen-lang-client-0669750040.firebaseapp.com",
+  projectId: "gen-lang-client-0669750040",
+  storageBucket: "gen-lang-client-0669750040.firebasestorage.app",
+  messagingSenderId: "82394953259",
+  appId: "1:82394953259:web:fd554b41da954918b81c6e"
+};
+const FIRESTORE_DATABASE_ID = "ai-studio-android-shree-ban-d13fef37-7b40-4458-8796-d002f49be855";
+const ADMIN_AUTH_EMAIL = "admin980123@shreebanquethall.app";
+const ADMIN_USERNAME = "admin980123";
+const LEGACY_SUPABASE_URL = "https://agshupnzhpeqiwezsnyp.supabase.co";
+const LEGACY_SUPABASE_KEY = "sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M";
+const legacyDb = window.supabase.createClient(LEGACY_SUPABASE_URL, LEGACY_SUPABASE_KEY);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app, FIRESTORE_DATABASE_ID);
+const $ = id => document.getElementById(id);
+let month = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let records = new Map(), selected = null, unsubscribeDates = null, authReady = false;
+
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today = () => iso(new Date());
 function msg(t,error=false){$('message').textContent=t;$('message').style.color=error?'#a52e2e':''}
-function showCalendar(){$('loginPanel').classList.add('hidden');$('calendarPanel').classList.remove('hidden');$('logout').classList.remove('hidden');loadMonth()}
-async function checkSession(){const {data:{session}}=await db.auth.getSession();if(!session)return;if(session.user?.id===ADMIN_USER_ID){showCalendar();return}await db.auth.signOut()}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginError').textContent='';const enteredUsername=$('username').value.trim().toLowerCase();if(enteredUsername!==ADMIN_USERNAME && enteredUsername!==ADMIN_EMAIL){$('loginError').textContent='Enter admin980123 or the registered admin email.';return}
-const {error}=await db.auth.signInWithPassword({email:ADMIN_EMAIL,password:$('password').value});if(error){$('loginError').textContent='Login failed. Check your username and password.';return}const {data:{user}}=await db.auth.getUser();if(user?.id!==ADMIN_USER_ID){await db.auth.signOut();$('loginError').textContent='This account is not authorised for admin access.';return}showCalendar()});
-$('logout').addEventListener('click',async()=>{await db.auth.signOut();$('calendarPanel').classList.add('hidden');$('loginPanel').classList.remove('hidden');$('logout').classList.add('hidden');$('password').value=''});
-async function loadMonth(){msg('Loading saved dates…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
-const {data,error}=await db.from('booking_dates').select('booking_date,status').gte('booking_date',start).lte('booking_date',end);
-if(error){msg('Could not load dates. Please refresh or sign in again.',true);return}records=new Map(data.map(x=>[x.booking_date,x.status]));render();msg('Changes save automatically to the secure database.')}
-function render(){$('monthTitle').textContent=month.toLocaleDateString('en-IN',{month:'long',year:'numeric'});const g=$('calendar');g.innerHTML='';
-['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>{const d=document.createElement('div');d.className='dow';d.textContent=x;g.append(d)});
-const first=new Date(month.getFullYear(),month.getMonth(),1),offset=first.getDay(),count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();for(let i=0;i<offset;i++)g.append(document.createElement('div'));
-for(let n=1;n<=count;n++){const date=new Date(month.getFullYear(),month.getMonth(),n),key=iso(date),status=records.get(key),past=key<today(),b=document.createElement('button');b.type='button';b.className='day '+(past?'past':status||'available')+(selected===key?' selected':'');b.disabled=past;
-const num=document.createElement('span');num.textContent=n;const st=document.createElement('span');st.className='state';st.textContent=past?'Past':status?status[0].toUpperCase()+status.slice(1):'Available';b.append(num,st);b.addEventListener('click',()=>choose(key));g.append(b)}}
+function showCalendar(){
+  $('loginPanel').classList.add('hidden');$('calendarPanel').classList.remove('hidden');$('logout').classList.remove('hidden');
+  if(unsubscribeDates) unsubscribeDates();
+  const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
+  const q=query(collection(db,'calendar_dates'),where('isPublic','==',true));
+  unsubscribeDates=onSnapshot(q,snapshot=>{
+    records=new Map(snapshot.docs.map(d=>[d.id,d.data().status]));
+    render();msg('Live sync active · Changes appear on all devices.');
+  },error=>msg('Could not load calendar: '+error.message,true));
+}
+function showLogin(){
+  $('calendarPanel').classList.add('hidden');$('loginPanel').classList.remove('hidden');$('logout').classList.add('hidden');
+  if(unsubscribeDates){unsubscribeDates();unsubscribeDates=null;}
+}
+onAuthStateChanged(auth, async user=>{
+  if(!authReady){authReady=true;if(!user){try{await signInAnonymously(auth)}catch(e){$('loginError').textContent='Could not connect to Firebase: '+e.message}}}
+  if(user && user.isAnonymous){showLogin();return}
+  if(user && !user.isAnonymous){
+    try{const adminDoc=await getDoc(doc(db,'admins',user.uid));if(adminDoc.exists()){showCalendar();return}}catch(e){$('loginError').textContent='Admin access check failed: '+e.message}
+    await signOut(auth);showLogin();return
+  }
+  showLogin();
+});
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('loginError').textContent='';
+  const identifier=$('username').value.trim().toLowerCase();
+  if(identifier!==ADMIN_USERNAME){$('loginError').textContent='Enter the admin username.';return}
+  try{
+    const credential=await signInWithEmailAndPassword(auth,ADMIN_AUTH_EMAIL,$('password').value);
+    const adminDoc=await getDoc(doc(db,'admins',credential.user.uid));if(!adminDoc.exists()){await signOut(auth);$('loginError').textContent='This account is not authorized as an admin.';return}
+    showCalendar();
+  }catch(error){$('loginError').textContent='Login failed. Check the admin username and password.'}
+});
+$('logout').addEventListener('click',async()=>{if(unsubscribeDates){unsubscribeDates();unsubscribeDates=null}await signOut(auth);$('password').value='';showLogin();try{await signInAnonymously(auth)}catch(e){}});
+function render(){
+  $('monthTitle').textContent=month.toLocaleDateString('en-IN',{month:'long',year:'numeric'});const g=$('calendar');g.innerHTML='';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>{const d=document.createElement('div');d.className='dow';d.textContent=x;g.append(d)});
+  const first=new Date(month.getFullYear(),month.getMonth(),1),offset=first.getDay(),count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();for(let i=0;i<offset;i++)g.append(document.createElement('div'));
+  for(let n=1;n<=count;n++){const key=iso(new Date(month.getFullYear(),month.getMonth(),n)),status=records.get(key),past=key<today(),b=document.createElement('button');b.type='button';b.className='day '+(past?'past':status||'available')+(selected===key?' selected':'');b.disabled=past;const num=document.createElement('span');num.textContent=n;const st=document.createElement('span');st.className='state';st.textContent=past?'Past':status?status[0].toUpperCase()+status.slice(1):'Available';b.append(num,st);b.addEventListener('click',()=>choose(key));g.append(b)}
+}
 function choose(key){selected=key;const status=records.get(key);$('selectedLabel').textContent=`${new Date(key+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})} · ${status?status[0].toUpperCase()+status.slice(1):'Available'}`;$('setPending').disabled=false;$('setBooked').disabled=false;$('setAvailable').disabled=!status;render()}
-async function save(status){if(!selected)return;msg('Saving…');let result=status==='available'?await db.from('booking_dates').delete().eq('booking_date',selected):await db.from('booking_dates').upsert({booking_date:selected,status,updated_at:new Date().toISOString()},{onConflict:'booking_date'});
-if(result.error){msg('Could not save this change. Please try again.',true);return}await loadMonth();choose(selected);msg('Saved successfully.')}
+async function save(status){
+  if(!selected)return;msg('Saving…');
+  try{
+    const uid=auth.currentUser.uid, publicRef=doc(db,'calendar_dates',selected), privateRef=doc(db,'admin_bookings',selected), batch=writeBatch(db);
+    if(status==='available'){batch.delete(publicRef);batch.delete(privateRef)}
+    else{
+      batch.set(publicRef,{dateKey:selected,yearMonth:selected.slice(0,7),status,isPublic:true,updatedByUid:uid,updatedAt:serverTimestamp()});
+      const existingPrivate=await getDoc(privateRef), previous=existingPrivate.exists()?existingPrivate.data():{};
+      batch.set(privateRef,{dateKey:selected,status,clientName:previous.clientName||'',clientPhone:previous.clientPhone||'',eventType:previous.eventType||'',notes:previous.notes||'',updatedByUid:uid,createdAt:previous.createdAt||serverTimestamp(),updatedAt:serverTimestamp()});
+    }
+    await batch.commit();choose(selected);msg('Saved · Syncing across all devices.');
+  }catch(error){msg('Could not save this change: '+error.message,true)}
+}
+$('migrateLegacy').addEventListener('click',async()=>{
+  if(!auth.currentUser || auth.currentUser.isAnonymous){msg('Admin sign-in required for import.',true);return}
+  if(!confirm('Import old website booking dates into Firebase? Existing Firebase dates will never be overwritten.'))return;
+  msg('Reading old website dates…');
+  try{
+    const {data,error}=await legacyDb.from('booking_dates').select('booking_date,status');
+    if(error)throw error;
+    const existing=await getDocs(query(collection(db,'calendar_dates'),where('isPublic','==',true)));
+    const known=new Set(existing.docs.map(d=>d.id));
+    const rows=(data||[]).filter(row=>row.booking_date && ['pending','booked'].includes(String(row.status).toLowerCase()) && !known.has(row.booking_date));
+    let imported=0;
+    for(let offset=0;offset<rows.length;offset+=400){
+      const batch=writeBatch(db),chunk=rows.slice(offset,offset+400);
+      for(const row of chunk){
+        const dateKey=row.booking_date,ref=doc(db,'calendar_dates',dateKey);
+        batch.set(ref,{dateKey,yearMonth:dateKey.slice(0,7),status:String(row.status).toLowerCase(),isPublic:true,updatedByUid:auth.currentUser.uid,updatedAt:serverTimestamp()});
+      }
+      await batch.commit();imported+=chunk.length;
+    }
+    msg('Import complete: '+imported+' dates added; '+((data||[]).length-imported)+' already present or skipped. Old Supabase records were not deleted.');
+  }catch(error){msg('Import failed: '+error.message,true)}
+});
 $('setPending').addEventListener('click',()=>save('pending'));$('setBooked').addEventListener('click',()=>save('booked'));$('setAvailable').addEventListener('click',()=>save('available'));
-$('prev').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=null;loadMonth()});$('next').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=null;loadMonth()});checkSession();
-</script></body></html>
+$('prev').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=null;showCalendar()});
+$('next').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=null;showCalendar()});
+</script>
+</body></html>
