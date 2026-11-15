@@ -45,12 +45,13 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
 <form id="loginForm"><label class="field"><span>Username or email</span><input id="username" autocomplete="username" placeholder="admin980123 or krshreebanquethall@gmail.com" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label><button class="btn gold" type="submit" style="width:100%">Login securely</button><div id="loginError" class="error" role="alert"></div></form></section>
 <section id="calendarPanel" class="panel hidden"><div class="head"><div><h1>Booking Calendar</h1><p style="margin:0">Internal use only · Select a date to update its status.</p></div><div><button id="prev" class="btn outline" type="button">‹</button> <button id="next" class="btn outline" type="button">›</button></div></div>
 <div id="monthTitle" class="month"></div><div class="legend"><span><i class="dot" style="background:#55a66a"></i>Available</span><span><i class="dot" style="background:#d9a53d"></i>Pending</span><span><i class="dot" style="background:#d85b5b"></i>Booked</span><span><i class="dot" style="background:#aaa"></i>Past</span></div>
-<div id="calendar" class="grid"></div><div class="actions"><div id="selectedLabel" class="selected-label">Select a future date</div><button id="setPending" class="btn" style="background:#f8e8c8;color:#805300" disabled>Set Pending</button><button id="setBooked" class="btn" style="background:#f8dede;color:#922" disabled>Mark Booked</button><button id="setAvailable" class="btn outline" disabled>Set Available</button><div id="message" class="note" role="status">Changes save automatically to the secure database.</div></div></section>
+<div id="calendar" class="grid"></div><div class="actions"><div id="selectedLabel" class="selected-label">Select a future date</div><button id="setPending" class="btn" style="background:#f8e8c8;color:#805300" disabled>Set Pending</button><button id="setBooked" class="btn" style="background:#f8dede;color:#922" disabled>Mark Booked</button><button id="setAvailable" class="btn outline" disabled>Set Available</button><button id="migrateLegacy" class="btn outline" type="button">Import old website dates</button><div id="message" class="note" role="status">Changes save automatically to the secure database.</div></div></section>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, onSnapshot, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDoo51V8Y5HqSTPBWnlNqn-zkg8nLfAmSU",
@@ -63,6 +64,9 @@ const firebaseConfig = {
 const FIRESTORE_DATABASE_ID = "ai-studio-android-shree-ban-d13fef37-7b40-4458-8796-d002f49be855";
 const ADMIN_EMAIL = "krshreebanquethall@gmail.com";
 const ADMIN_USERNAME = "admin980123";
+const LEGACY_SUPABASE_URL = "https://agshupnzhpeqiwezsnyp.supabase.co";
+const LEGACY_SUPABASE_KEY = "sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M";
+const legacyDb = window.supabase.createClient(LEGACY_SUPABASE_URL, LEGACY_SUPABASE_KEY);
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app, FIRESTORE_DATABASE_ID);
@@ -125,6 +129,28 @@ async function save(status){
     await batch.commit();choose(selected);msg('Saved · Syncing across all devices.');
   }catch(error){msg('Could not save this change: '+error.message,true)}
 }
+$('migrateLegacy').addEventListener('click',async()=>{
+  if(!auth.currentUser || auth.currentUser.isAnonymous){msg('Admin sign-in required for import.',true);return}
+  if(!confirm('Import old website booking dates into Firebase? Existing Firebase dates will never be overwritten.'))return;
+  msg('Reading old website dates…');
+  try{
+    const {data,error}=await legacyDb.from('booking_dates').select('booking_date,status');
+    if(error)throw error;
+    const existing=await getDocs(query(collection(db,'calendar_dates'),where('isPublic','==',true)));
+    const known=new Set(existing.docs.map(d=>d.id));
+    const rows=(data||[]).filter(row=>row.booking_date && ['pending','booked'].includes(String(row.status).toLowerCase()) && !known.has(row.booking_date));
+    let imported=0;
+    for(let offset=0;offset<rows.length;offset+=400){
+      const batch=writeBatch(db),chunk=rows.slice(offset,offset+400);
+      for(const row of chunk){
+        const dateKey=row.booking_date,ref=doc(db,'calendar_dates',dateKey);
+        batch.set(ref,{dateKey,yearMonth:dateKey.slice(0,7),status:String(row.status).toLowerCase(),isPublic:true,updatedByUid:auth.currentUser.uid,updatedAt:serverTimestamp()});
+      }
+      await batch.commit();imported+=chunk.length;
+    }
+    msg('Import complete: '+imported+' dates added; '+((data||[]).length-imported)+' already present or skipped. Old Supabase records were not deleted.');
+  }catch(error){msg('Import failed: '+error.message,true)}
+});
 $('setPending').addEventListener('click',()=>save('pending'));$('setBooked').addEventListener('click',()=>save('booked'));$('setAvailable').addEventListener('click',()=>save('available'));
 $('prev').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=null;showCalendar()});
 $('next').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=null;showCalendar()});
