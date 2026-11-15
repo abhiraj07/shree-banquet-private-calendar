@@ -42,7 +42,7 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
         </svg></span><span class="brand">Shree Banquet Hall<small>PRIVATE BOOKING MANAGEMENT</small></span></a><button id="logout" class="btn outline hidden" style="color:white;border-color:#ffffff66">Log out</button></header>
 <main>
 <section id="loginPanel" class="panel login"><h1>Admin Login</h1><p>Sign in to manage the private booking calendar.</p>
-<form id="loginForm"><label class="field"><span>Username or email</span><input id="username" autocomplete="username" placeholder="admin980123 or krshreebanquethall@gmail.com" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label><button class="btn gold" type="submit" style="width:100%">Login securely</button><div id="loginError" class="error" role="alert"></div></form></section>
+<form id="loginForm"><label class="field"><span>Admin username</span><input id="username" autocomplete="username" placeholder="Enter admin username" required></label><label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label><button class="btn gold" type="submit" style="width:100%">Login securely</button><div id="loginError" class="error" role="alert"></div></form></section>
 <section id="calendarPanel" class="panel hidden"><div class="head"><div><h1>Booking Calendar</h1><p style="margin:0">Internal use only · Select a date to update its status.</p></div><div><button id="prev" class="btn outline" type="button">‹</button> <button id="next" class="btn outline" type="button">›</button></div></div>
 <div id="monthTitle" class="month"></div><div class="legend"><span><i class="dot" style="background:#55a66a"></i>Available</span><span><i class="dot" style="background:#d9a53d"></i>Pending</span><span><i class="dot" style="background:#d85b5b"></i>Booked</span><span><i class="dot" style="background:#aaa"></i>Past</span></div>
 <div id="calendar" class="grid"></div><div class="actions"><div id="selectedLabel" class="selected-label">Select a future date</div><button id="setPending" class="btn" style="background:#f8e8c8;color:#805300" disabled>Set Pending</button><button id="setBooked" class="btn" style="background:#f8dede;color:#922" disabled>Mark Booked</button><button id="setAvailable" class="btn outline" disabled>Set Available</button><button id="migrateLegacy" class="btn outline" type="button">Import old website dates</button><div id="message" class="note" role="status">Changes save automatically to the secure database.</div></div></section>
@@ -62,7 +62,7 @@ const firebaseConfig = {
   appId: "1:82394953259:web:fd554b41da954918b81c6e"
 };
 const FIRESTORE_DATABASE_ID = "ai-studio-android-shree-ban-d13fef37-7b40-4458-8796-d002f49be855";
-const ADMIN_EMAIL = "krshreebanquethall@gmail.com";
+const ADMIN_AUTH_EMAIL = "admin980123@shreebanquethall.app";
 const ADMIN_USERNAME = "admin980123";
 const LEGACY_SUPABASE_URL = "https://agshupnzhpeqiwezsnyp.supabase.co";
 const LEGACY_SUPABASE_KEY = "sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M";
@@ -94,19 +94,21 @@ function showLogin(){
 onAuthStateChanged(auth, async user=>{
   if(!authReady){authReady=true;if(!user){try{await signInAnonymously(auth)}catch(e){$('loginError').textContent='Could not connect to Firebase: '+e.message}}}
   if(user && user.isAnonymous){showLogin();return}
-  if(user && user.email===ADMIN_EMAIL && user.emailVerified){showCalendar();return}
-  if(user){await signOut(auth);showLogin();return}
+  if(user && !user.isAnonymous){
+    try{const adminDoc=await getDoc(doc(db,'admins',user.uid));if(adminDoc.exists()){showCalendar();return}}catch(e){$('loginError').textContent='Admin access check failed: '+e.message}
+    await signOut(auth);showLogin();return
+  }
   showLogin();
 });
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();$('loginError').textContent='';
   const identifier=$('username').value.trim().toLowerCase();
-  if(identifier!==ADMIN_USERNAME && identifier!==ADMIN_EMAIL){$('loginError').textContent='Enter admin980123 or the registered admin email.';return}
+  if(identifier!==ADMIN_USERNAME){$('loginError').textContent='Enter the admin username.';return}
   try{
-    const credential=await signInWithEmailAndPassword(auth,ADMIN_EMAIL,$('password').value);
-    if(credential.user.email!==ADMIN_EMAIL || !credential.user.emailVerified){await signOut(auth);$('loginError').textContent='Verify the admin email address before signing in.';return}
+    const credential=await signInWithEmailAndPassword(auth,ADMIN_AUTH_EMAIL,$('password').value);
+    const adminDoc=await getDoc(doc(db,'admins',credential.user.uid));if(!adminDoc.exists()){await signOut(auth);$('loginError').textContent='This account is not authorized as an admin.';return}
     showCalendar();
-  }catch(error){$('loginError').textContent='Login failed. Check your password and verify the admin email.'}
+  }catch(error){$('loginError').textContent='Login failed. Check the admin username and password.'}
 });
 $('logout').addEventListener('click',async()=>{if(unsubscribeDates){unsubscribeDates();unsubscribeDates=null}await signOut(auth);$('password').value='';showLogin();try{await signInAnonymously(auth)}catch(e){}});
 function render(){
