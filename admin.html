@@ -50,7 +50,7 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, onSnapshot, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDoo51V8Y5HqSTPBWnlNqn-zkg8nLfAmSU",
@@ -77,7 +77,7 @@ function showCalendar(){
   $('loginPanel').classList.add('hidden');$('calendarPanel').classList.remove('hidden');$('logout').classList.remove('hidden');
   if(unsubscribeDates) unsubscribeDates();
   const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
-  const q=collection(db,'calendar_dates');
+  const q=query(collection(db,'calendar_dates'),where('isPublic','==',true));
   unsubscribeDates=onSnapshot(q,snapshot=>{
     records=new Map(snapshot.docs.map(d=>[d.id,d.data().status]));
     render();msg('Live sync active · Changes appear on all devices.');
