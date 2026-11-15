@@ -95,4 +95,5 @@ async function clearBooking(){if(!selected)return;msg('Clearing booking…');con
 function startRealtime(){if(realtimeChannel)return;realtimeChannel=db.channel('private-booking-calendar').on('postgres_changes',{event:'*',schema:'public',table:'booking_dates'},()=>loadMonth()).on('postgres_changes',{event:'*',schema:'public',table:'admin_bookings'},()=>loadMonth()).subscribe()}
 $('setPending').addEventListener('click',()=>save('pending'));$('setBooked').addEventListener('click',()=>save('booked'));$('setAvailable').addEventListener('click',clearBooking);
 $('prev').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);selected=null;loadMonth()});$('next').addEventListener('click',()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);selected=null;loadMonth()});
+checkSession();
 </script></body></html>
