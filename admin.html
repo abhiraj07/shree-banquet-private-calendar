@@ -61,16 +61,16 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
 const SUPABASE_URL='https://agshupnzhpeqiwezsnyp.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_-gIJozghyFLW9TQfwY3FxA_OWZI097M';
 const ADMIN_EMAIL='krshreebanquethall@gmail.com', ADMIN_USERNAME='admin980123';
-const ADMIN_USER_ID='5643d2c0-ffc0-4318-b796-6c7eb2d2bc60';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY), $=id=>document.getElementById(id);
 let month=new Date(new Date().getFullYear(),new Date().getMonth(),1), records=new Map(), privateRecords=new Map(), selected=null, realtimeChannel=null;
 const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const today=()=>iso(new Date());
 function msg(t,error=false){$('message').textContent=t;$('message').style.color=error?'#a52e2e':''}
 function showCalendar(){$('loginPanel').classList.add('hidden');$('calendarPanel').classList.remove('hidden');$('logout').classList.remove('hidden');loadMonth();startRealtime()}
-async function checkSession(){const {data:{session}}=await db.auth.getSession();if(!session)return;const {data:{user}}=await db.auth.getUser();if(user?.id===ADMIN_USER_ID){showCalendar();return}await db.auth.signOut()}
+async function checkAdminAllowList(userId){const {data,error}=await db.from('admin_users').select('user_id').eq('user_id',userId).maybeSingle();return !error && !!data}
+async function checkSession(){const {data:{session}}=await db.auth.getSession();if(!session)return;const {data:{user}}=await db.auth.getUser();if(user?.id && await checkAdminAllowList(user.id)){showCalendar();return}await db.auth.signOut()}
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginError').textContent='';const enteredUsername=$('username').value.trim().toLowerCase();if(enteredUsername!==ADMIN_USERNAME && enteredUsername!==ADMIN_EMAIL){$('loginError').textContent='Enter admin980123 or the registered admin email.';return}
-const {error}=await db.auth.signInWithPassword({email:ADMIN_EMAIL,password:$('password').value});if(error){$('loginError').textContent='Login failed. Check your username and password.';return}const {data:{user}}=await db.auth.getUser();if(user?.id!==ADMIN_USER_ID){await db.auth.signOut();$('loginError').textContent='This account is not authorised for admin access.';return}showCalendar()});
+const {error}=await db.auth.signInWithPassword({email:ADMIN_EMAIL,password:$('password').value});if(error){$('loginError').textContent='Login failed. Check your username and password.';return}const {data:{user}}=await db.auth.getUser();if(!user?.id || !(await checkAdminAllowList(user.id))){await db.auth.signOut();$('loginError').textContent='This account is not authorised for admin access. Verify the admin allow-list migration.';return}showCalendar()});
 $('logout').addEventListener('click',async()=>{if(realtimeChannel)await db.removeChannel(realtimeChannel);realtimeChannel=null;await db.auth.signOut();$('calendarPanel').classList.add('hidden');$('loginPanel').classList.remove('hidden');$('logout').classList.add('hidden');$('password').value=''});
 async function loadMonth(){msg('Loading saved dates…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
 const [publicResult,privateResult]=await Promise.all([
