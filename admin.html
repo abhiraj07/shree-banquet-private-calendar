@@ -88,7 +88,22 @@ const num=document.createElement('span');num.textContent=n;const st=document.cre
 function choose(key){selected=key;const status=records.get(key),entry=privateRecords.get(key);$('selectedLabel').textContent=`${new Date(key+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})} · ${status?status[0].toUpperCase()+status.slice(1):'Available'}`;
 $('clientName').value=entry?.client_name||'';$('clientPhone').value=entry?.client_phone||'';$('eventType').value=entry?.event_type||'';$('notes').value=entry?.notes||'';
 $('setPending').disabled=false;$('setBooked').disabled=false;$('setAvailable').disabled=!status;render()}
-function renderUpcoming(){const host=$('upcomingBookings');const items=[...privateRecords.values()].filter(x=>x.booking_date>=today()).sort((a,b)=>a.booking_date.localeCompare(b.booking_date));host.innerHTML='';if(!items.length){host.textContent='No upcoming bookings this month.';return}items.forEach(item=>{const el=document.createElement('div');el.className='upcoming-item';const date=new Date(item.booking_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});el.textContent=`${date} · ${item.client_name||'Name not added'} · ${item.event_type||item.status}`;el.addEventListener('click',()=>choose(item.booking_date));el.style.cursor='pointer';host.append(el)})}
+function renderUpcoming(){
+const host=$('upcomingBookings');
+const keys=new Set([...records.keys(),...privateRecords.keys()]);
+const items=[...keys].map(key=>({booking_date:key,status:records.get(key)||privateRecords.get(key)?.status,...(privateRecords.get(key)||{})}))
+ .filter(x=>x.booking_date>=today() && x.status)
+ .sort((a,b)=>a.booking_date.localeCompare(b.booking_date));
+host.innerHTML='';
+if(!items.length){host.textContent='No upcoming bookings this month.';return}
+items.forEach(item=>{
+ const el=document.createElement('div');el.className='upcoming-item';
+ const date=new Date(item.booking_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+ const name=item.client_name?.trim()||'Details not added';
+ const type=item.event_type?.trim()||item.status;
+ el.textContent=`${date} · ${name} · ${type}`;
+ el.addEventListener('click',()=>choose(item.booking_date));el.style.cursor='pointer';host.append(el)
+})}
 async function save(status){if(!selected)return;msg('Saving booking…');const {error}=await db.rpc('save_shree_booking',{p_booking_date:selected,p_status:status,p_client_name:$('clientName').value,p_client_phone:$('clientPhone').value,p_event_type:$('eventType').value,p_notes:$('notes').value});
 if(error){msg('Could not save booking. Ensure the shared Supabase migration is applied.',true);return}await loadMonth();choose(selected);msg('Booking saved successfully.')}
 async function clearBooking(){if(!selected)return;msg('Clearing booking…');const {error}=await db.rpc('clear_shree_booking',{p_booking_date:selected});if(error){msg('Could not clear booking. Please try again.',true);return}selected=null;await loadMonth();$('selectedLabel').textContent='Select a future date';$('setPending').disabled=true;$('setBooked').disabled=true;$('setAvailable').disabled=true;$('clientName').value='';$('clientPhone').value='';$('eventType').value='';$('notes').value='';msg('Booking cleared; date is now available.')}
