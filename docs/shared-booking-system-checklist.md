@@ -11,6 +11,7 @@
 - [ ] Clear booking.
 - [ ] Upcoming bookings for the selected month.
 - [ ] Realtime sync with Android app and public website.
+- [ ] Enable Realtime publication for `booking_dates`, `admin_bookings`, and `admin_users`; Android's current admin allow-list check subscribes to `admin_users` as well.
 
 ## Security
 - [ ] Supabase Auth session required for all admin operations.
