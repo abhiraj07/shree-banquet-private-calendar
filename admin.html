@@ -21,7 +21,7 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
 .day{min-height:82px;border:1px solid #e6e8e3;border-radius:12px;background:#fff;padding:9px;text-align:left;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between}
 .day .state{font-size:11px}.available{background:#e5f2e8;border-color:#c7e2cd;color:#236b38}.pending{background:#f8e8c8;border-color:#eed39a;color:#91600c}.booked{background:#f8dede;border-color:#efc1c1;color:#a52e2e}.past{background:#e7e7e7;border-color:#ddd;color:#777;cursor:not-allowed}.selected{outline:2px solid var(--g);outline-offset:2px}
 .actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid #eee}.selected-label{font-weight:600;margin-right:auto}.note{font-size:13px;color:var(--muted);width:100%;margin-top:3px}
-.details{margin-top:20px;padding-top:18px;border-top:1px solid #eee;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.details h2{grid-column:1/-1;font:600 24px "Cormorant Garamond",serif;color:var(--g);margin:0}.details .field{margin:0}.details .field input,.details .field select,.details .field textarea{width:100%;padding:11px;border:1px solid #d9ded9;border-radius:10px;font:inherit}.details .wide{grid-column:1/-1}.details textarea{min-height:82px;resize:vertical}.upcoming{margin-top:22px;padding-top:18px;border-top:1px solid #eee}.upcoming h2{font:600 24px "Cormorant Garamond",serif;color:var(--g)}.upcoming-item{padding:9px 0;border-bottom:1px solid #eee;font-size:14px}@media(max-width:600px){.details{grid-template-columns:1fr}.details h2,.details .wide{grid-column:auto}}@media(max-width:600px){main{margin:20px auto;padding:0 12px}.panel{padding:16px}.top{padding:16px 18px}.brand{font-size:19px}.day{min-height:62px;padding:6px;border-radius:8px}.day .state{font-size:9px}.grid{gap:5px}.month{font-size:24px}.btn{padding:10px 11px;font-size:13px}}
+.details{margin-top:20px;padding-top:18px;border-top:1px solid #eee;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.details h2{grid-column:1/-1;font:600 24px "Cormorant Garamond",serif;color:var(--g);margin:0}.details .field{margin:0}.details .field input,.details .field select,.details .field textarea{width:100%;padding:11px;border:1px solid #d9ded9;border-radius:10px;font:inherit}.details .wide{grid-column:1/-1}.details textarea{min-height:82px;resize:vertical}.upcoming{margin-top:22px;padding-top:18px;border-top:1px solid #eee}.upcoming h2{font:600 24px "Cormorant Garamond",serif;color:var(--g)}.upcoming-item{padding:9px 0;border-bottom:1px solid #eee;font-size:14px;cursor:pointer}.history{margin-top:22px;padding-top:18px;border-top:1px solid #eee}.history h2{font:600 24px "Cormorant Garamond",serif;color:var(--g)}.history-item{padding:10px 12px;border:1px solid #eee;border-radius:10px;margin:8px 0;cursor:pointer;font-size:14px}.history-item:hover{background:#faf6ec}.history-empty{color:var(--muted);font-size:13px}@media(max-width:600px){.details{grid-template-columns:1fr}.details h2,.details .wide{grid-column:auto}}@media(max-width:600px){main{margin:20px auto;padding:0 12px}.panel{padding:16px}.top{padding:16px 18px}.brand{font-size:19px}.day{min-height:62px;padding:6px;border-radius:8px}.day .state{font-size:9px}.grid{gap:5px}.month{font-size:24px}.btn{padding:10px 11px;font-size:13px}}
 </style></head>
 <body>
 <header class="top"><a class="brand-link" href="./index.html" aria-label="Shree Banquet Hall home"><span class="brand-logo" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none" stroke="currentColor">
@@ -54,7 +54,7 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
 <label class="field wide"><span>Private Management Notes</span><textarea id="notes" maxlength="500" placeholder="Internal notes — never shown on the public website"></textarea></label>
 <div class="wide"><span class="note">These details are visible only to the authenticated admin.</span></div>
 </div>
-<div class="upcoming"><h2>Upcoming Bookings This Month</h2><div id="upcomingBookings" class="note">Loading…</div></div></div></section>
+<div class="upcoming"><h2>Upcoming Bookings This Month</h2><div id="upcomingBookings" class="note">Loading…</div></div><div class="history"><h2>All Past Booked History</h2><div id="pastBookings" class="note">Loading booking history…</div></div></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -73,27 +73,27 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginEr
 const {error}=await db.auth.signInWithPassword({email:ADMIN_EMAIL,password:$('password').value});if(error){$('loginError').textContent='Login failed. Check your username and password.';return}const {data:{user}}=await db.auth.getUser();if(!user?.id || !(await checkAdminAllowList(user.id))){await db.auth.signOut();$('loginError').textContent='This account is not authorised for admin access. Verify the admin allow-list migration.';return}showCalendar()});
 $('forgotPassword').addEventListener('click',async()=>{const button=$('forgotPassword');button.disabled=true;$('loginError').textContent='Sending password reset email…';const redirectTo=new URL('./reset-password.html',window.location.href).toString();const {error}=await db.auth.resetPasswordForEmail(ADMIN_EMAIL,{redirectTo});button.disabled=false;if(error){$('loginError').textContent='Could not send reset email. Please wait a few minutes and try again.';return}$('loginError').style.color='#236b38';$('loginError').textContent='Password reset email sent to the registered admin email. Check your inbox and spam folder.';});
 $('logout').addEventListener('click',async()=>{if(realtimeChannel)await db.removeChannel(realtimeChannel);realtimeChannel=null;await db.auth.signOut();$('calendarPanel').classList.add('hidden');$('loginPanel').classList.remove('hidden');$('logout').classList.add('hidden');$('password').value=''});
-async function loadMonth(){msg('Loading saved dates…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
+async function loadMonth(){msg('Loading saved dates and booking history…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
 const [publicResult,privateResult]=await Promise.all([
  db.from('public_booking_calendar').select('booking_date,status').gte('booking_date',start).lte('booking_date',end),
- db.from('admin_bookings').select('booking_date,status,client_name,client_phone,event_type,notes').gte('booking_date',start).lte('booking_date',end)
+ db.from('admin_bookings').select('booking_date,status,client_name,client_phone,event_type,notes').order('booking_date',{ascending:false})
 ]);
 if(publicResult.error){msg('Could not load calendar dates. Check database setup and admin access.',true);return}
-if(privateResult.error){msg('Calendar loaded, but private details are unavailable. Apply the reviewed admin-bookings migration first.',true);return}
-records=new Map(publicResult.data.map(x=>[x.booking_date,x.status]));privateRecords=new Map(privateResult.data.map(x=>[x.booking_date,x]));render();renderUpcoming();msg('Changes save to the shared secure database.') }
+if(privateResult.error){msg('Calendar loaded, but private details are unavailable. Check admin-bookings access.',true);return}
+records=new Map(publicResult.data.map(x=>[x.booking_date,x.status]));privateRecords=new Map(privateResult.data.map(x=>[x.booking_date,x]));render();renderUpcoming();renderPastBookings();msg('Calendar and complete booking history loaded.') }
 function render(){$('monthTitle').textContent=month.toLocaleDateString('en-IN',{month:'long',year:'numeric'});const g=$('calendar');g.innerHTML='';
 ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>{const d=document.createElement('div');d.className='dow';d.textContent=x;g.append(d)});
 const first=new Date(month.getFullYear(),month.getMonth(),1),offset=first.getDay(),count=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();for(let i=0;i<offset;i++)g.append(document.createElement('div'));
-for(let n=1;n<=count;n++){const date=new Date(month.getFullYear(),month.getMonth(),n),key=iso(date),status=records.get(key),past=key<today(),b=document.createElement('button');b.type='button';b.className='day '+(past?'past':status||'available')+(selected===key?' selected':'');b.disabled=past;
-const num=document.createElement('span');num.textContent=n;const st=document.createElement('span');st.className='state';st.textContent=past?'Past':status?status[0].toUpperCase()+status.slice(1):'Available';b.append(num,st);b.addEventListener('click',()=>choose(key));g.append(b)}}
+for(let n=1;n<=count;n++){const date=new Date(month.getFullYear(),month.getMonth(),n),key=iso(date),status=records.get(key),past=key<today(),b=document.createElement('button');b.type='button';b.className='day '+(status||(past?'past':'available'))+(selected===key?' selected':'');b.disabled=past&&!status;
+const num=document.createElement('span');num.textContent=n;const st=document.createElement('span');st.className='state';st.textContent=past?(status?status[0].toUpperCase()+status.slice(1)+' · Past':'Past'):status?status[0].toUpperCase()+status.slice(1):'Available';b.append(num,st);b.addEventListener('click',()=>choose(key));g.append(b)}}
 function choose(key){selected=key;const status=records.get(key),entry=privateRecords.get(key);$('selectedLabel').textContent=`${new Date(key+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})} · ${status?status[0].toUpperCase()+status.slice(1):'Available'}`;
 $('clientName').value=entry?.client_name||'';$('clientPhone').value=entry?.client_phone||'';$('eventType').value=entry?.event_type||'';$('notes').value=entry?.notes||'';
-$('setPending').disabled=false;$('setBooked').disabled=false;$('setAvailable').disabled=!status;render()}
+const isPast=key<today();$('setPending').disabled=isPast;$('setBooked').disabled=isPast;$('setAvailable').disabled=isPast||!status;render()}
 function renderUpcoming(){
 const host=$('upcomingBookings');
 const keys=new Set([...records.keys(),...privateRecords.keys()]);
 const items=[...keys].map(key=>({booking_date:key,status:records.get(key)||privateRecords.get(key)?.status,...(privateRecords.get(key)||{})}))
- .filter(x=>x.booking_date>=today() && x.status)
+ .filter(x=>x.booking_date>=today() && x.booking_date<=iso(new Date(month.getFullYear(),month.getMonth()+1,0)) && x.status)
  .sort((a,b)=>a.booking_date.localeCompare(b.booking_date));
 host.innerHTML='';
 if(!items.length){host.textContent='No upcoming bookings this month.';return}
@@ -105,7 +105,20 @@ items.forEach(item=>{
  el.textContent=`${date} · ${name} · ${type}`;
  el.addEventListener('click',()=>choose(item.booking_date));el.style.cursor='pointer';host.append(el)
 })}
-async function save(status){if(!selected)return;msg('Saving booking…');const {error}=await db.rpc('save_shree_booking',{p_booking_date:selected,p_status:status,p_client_name:$('clientName').value,p_client_phone:$('clientPhone').value,p_event_type:$('eventType').value,p_notes:$('notes').value});
+function renderPastBookings(){
+ const host=$('pastBookings');host.innerHTML='';
+ const items=[...privateRecords.values()].filter(x=>x.status==='booked'&&x.booking_date<today()).sort((a,b)=>b.booking_date.localeCompare(a.booking_date));
+ if(!items.length){host.textContent='No past booked records found.';host.className='history-empty';return;}
+ host.className='';
+ items.forEach(item=>{
+  const el=document.createElement('div');el.className='history-item';
+  const date=new Date(item.booking_date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  el.textContent=date+' · '+(item.client_name?.trim()||'Client details not added')+' · '+(item.event_type?.trim()||'Booked');
+  el.addEventListener('click',()=>{const d=new Date(item.booking_date+'T00:00:00');month=new Date(d.getFullYear(),d.getMonth(),1);loadMonth().then(()=>choose(item.booking_date));});
+  host.append(el);
+ });
+}
+async function save(status){if(!selected||selected<today()){msg('Past booking history is view-only.',true);return;}msg('Saving booking…');const {error}=await db.rpc('save_shree_booking',{p_booking_date:selected,p_status:status,p_client_name:$('clientName').value,p_client_phone:$('clientPhone').value,p_event_type:$('eventType').value,p_notes:$('notes').value});
 if(error){msg('Could not save booking. Ensure the shared Supabase migration is applied.',true);return}await loadMonth();choose(selected);msg('Booking saved successfully.')}
 async function clearBooking(){if(!selected)return;msg('Clearing booking…');const {error}=await db.rpc('clear_shree_booking',{p_booking_date:selected});if(error){msg('Could not clear booking. Please try again.',true);return}selected=null;await loadMonth();$('selectedLabel').textContent='Select a future date';$('setPending').disabled=true;$('setBooked').disabled=true;$('setAvailable').disabled=true;$('clientName').value='';$('clientPhone').value='';$('eventType').value='';$('notes').value='';msg('Booking cleared; date is now available.')}
 function startRealtime(){if(realtimeChannel)return;realtimeChannel=db.channel('private-booking-calendar').on('postgres_changes',{event:'*',schema:'public',table:'booking_dates'},()=>loadMonth()).on('postgres_changes',{event:'*',schema:'public',table:'admin_bookings'},()=>loadMonth()).subscribe()}

@@ -67,7 +67,7 @@
       <div class="public-calendar-legend">
         <span><i class="public-calendar-dot" style="background:#a14343"></i>Booked</span>
         <span><i class="public-calendar-dot" style="background:#0b5141"></i>Available</span>
-        <span><i class="public-calendar-dot" style="background:#a17a32"></i>Pending</span>
+        <span><i class="public-calendar-dot" style="background:#a17a32"></i>Pending</span><span><i class="public-calendar-dot" style="background:#45534e"></i>Past</span>
       </div>
       <div id="publicCalendarStatus" class="public-calendar-status" role="status"></div>
     </div>
@@ -98,9 +98,9 @@ async function loadPublicCalendar(){
   const today=publicIso(new Date());
   for(let day=1;day<=count;day++){
     const date=publicIso(new Date(publicMonth.getFullYear(),publicMonth.getMonth(),day)),state=records.get(date),cell=document.createElement('div');
-    cell.className='public-calendar-day'+(state?' '+state:(date<today?' past':''));
+    cell.className='public-calendar-day'+(date<today?' past':(state?' '+state:''));
     cell.textContent=day;
-    cell.setAttribute('aria-label',`${day} ${publicMonth.toLocaleDateString('en-IN',{month:'long'})}: ${state|| (date<today?'Past':'Available')}`);
+    cell.setAttribute('aria-label',`${day} ${publicMonth.toLocaleDateString('en-IN',{month:'long'})}: ${date<today?'Past':(state||'Available')}`);
     grid.append(cell);
   }
   status.textContent='';
