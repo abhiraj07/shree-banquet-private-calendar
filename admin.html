@@ -93,7 +93,7 @@ function renderUpcoming(){
 const host=$('upcomingBookings');
 const keys=new Set([...records.keys(),...privateRecords.keys()]);
 const items=[...keys].map(key=>({booking_date:key,status:records.get(key)||privateRecords.get(key)?.status,...(privateRecords.get(key)||{})}))
- .filter(x=>x.booking_date>=today() && x.status)
+ .filter(x=>x.booking_date>=today() && x.booking_date<=iso(new Date(month.getFullYear(),month.getMonth()+1,0)) && x.status)
  .sort((a,b)=>a.booking_date.localeCompare(b.booking_date));
 host.innerHTML='';
 if(!items.length){host.textContent='No upcoming bookings this month.';return}
