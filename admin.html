@@ -54,7 +54,7 @@ main{max-width:1100px;margin:36px auto;padding:0 20px}.panel{background:#fff;bor
 <label class="field wide"><span>Private Management Notes</span><textarea id="notes" maxlength="500" placeholder="Internal notes — never shown on the public website"></textarea></label>
 <div class="wide"><span class="note">These details are visible only to the authenticated admin.</span></div>
 </div>
-<div class="upcoming"><h2>Upcoming Bookings This Month</h2><div id="upcomingBookings" class="note">Loading…</div></div><div class="history"><h2>All Past Booked History</h2><div id="pastBookings" class="note">Loading booking history…</div></div></div></section>
+<div class="upcoming"><h2>Upcoming Bookings This Month</h2><div id="upcomingBookings" class="note">Loading…</div></div><div class="history"><h2>Past Bookings This Month</h2><div id="pastBookings" class="note">Loading booking history…</div></div></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -76,7 +76,7 @@ $('logout').addEventListener('click',async()=>{if(realtimeChannel)await db.remov
 async function loadMonth(){msg('Loading saved dates and booking history…');const start=iso(new Date(month.getFullYear(),month.getMonth(),1)),end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
 const [publicResult,privateResult]=await Promise.all([
  db.from('public_booking_calendar').select('booking_date,status').gte('booking_date',start).lte('booking_date',end),
- db.from('admin_bookings').select('booking_date,status,client_name,client_phone,event_type,notes').order('booking_date',{ascending:false})
+ db.from('admin_bookings').select('booking_date,status,client_name,client_phone,event_type,notes').gte('booking_date',start).lte('booking_date',end).order('booking_date',{ascending:false})
 ]);
 if(publicResult.error){msg('Could not load calendar dates. Check database setup and admin access.',true);return}
 if(privateResult.error){msg('Calendar loaded, but private details are unavailable. Check admin-bookings access.',true);return}
@@ -93,7 +93,7 @@ function renderUpcoming(){
 const host=$('upcomingBookings');
 const keys=new Set([...records.keys(),...privateRecords.keys()]);
 const items=[...keys].map(key=>({booking_date:key,status:records.get(key)||privateRecords.get(key)?.status,...(privateRecords.get(key)||{})}))
- .filter(x=>x.booking_date>=today() && x.booking_date<=iso(new Date(month.getFullYear(),month.getMonth()+1,0)) && x.status)
+ .filter(x=>x.booking_date>=iso(new Date(month.getFullYear(),month.getMonth(),1)) && x.booking_date<=iso(new Date(month.getFullYear(),month.getMonth()+1,0)) && x.booking_date>=today() && x.status)
  .sort((a,b)=>a.booking_date.localeCompare(b.booking_date));
 host.innerHTML='';
 if(!items.length){host.textContent='No upcoming bookings this month.';return}
@@ -108,7 +108,7 @@ items.forEach(item=>{
 function renderPastBookings(){
  const host=$('pastBookings');host.innerHTML='';
  const items=[...privateRecords.values()].filter(x=>x.status==='booked'&&x.booking_date<today()).sort((a,b)=>b.booking_date.localeCompare(a.booking_date));
- if(!items.length){host.textContent='No past booked records found.';host.className='history-empty';return;}
+ if(!items.length){host.textContent='No past booked records for this month.';host.className='history-empty';return;}
  host.className='';
  items.forEach(item=>{
   const el=document.createElement('div');el.className='history-item';
